@@ -9,7 +9,7 @@ import os
 import sys
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(BASE_DIR)
-DATA_DIR = os.path.dirname(ROOT_DIR)
+DATA_DIR = ROOT_DIR
 sys.path.append(BASE_DIR)
 sys.path.append(os.path.join(BASE_DIR, 'models'))
 sys.path.append(os.path.join(BASE_DIR, 'utils'))
@@ -30,7 +30,7 @@ FLAGS = parser.parse_args()
 
 BATCH_SIZE = FLAGS.batch_size
 NUM_POINT = FLAGS.num_point
-MODEL_PATH = FLAGS.model_path
+MODEL_PATH = os.path.join(BASE_DIR,FLAGS.model_path)
 GPU_INDEX = FLAGS.gpu
 MODEL = importlib.import_module(FLAGS.model) # import network module
 DUMP_DIR = FLAGS.dump_dir
@@ -40,7 +40,7 @@ LOG_FOUT.write(str(FLAGS)+'\n')
 
 NUM_CLASSES = 40
 SHAPE_NAMES = [line.rstrip() for line in \
-    open(os.path.join(DATA_DIR, 'data_10K/modelnet40_normal_resampled/shape_names.txt'))]
+    open(os.path.join(DATA_DIR, 'data_10K/modelnet40_normal_resampled/modelnet40_shape_names.txt'))]
 
 HOSTNAME = socket.gethostname()
 

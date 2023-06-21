@@ -32,6 +32,8 @@ parser.add_argument('--optimizer', default='adam', help='adam or momentum [defau
 parser.add_argument('--decay_step', type=int, default=200000, help='Decay step for lr decay [default: 200000]')
 parser.add_argument('--decay_rate', type=float, default=0.7, help='Decay rate for lr decay [default: 0.7]')
 parser.add_argument('--normal', action='store_true', default='store_true', help='Whether to use normal information')
+parser.add_argument('--from_checkpoint', action='store_true', help='Starting from checkpoint' )
+parser.add_argument('--model_path', default='log/model_best_acc.ckpt', help='path to saved module')
 FLAGS = parser.parse_args()
 
 EPOCH_CNT = 0
@@ -48,6 +50,7 @@ DECAY_RATE = FLAGS.decay_rate
 
 MODEL = importlib.import_module(FLAGS.model) # import network module
 MODEL_FILE = os.path.join(ROOT_DIR, 'models', FLAGS.model+'.py')
+MODEL_PATH = os.path.join(BASE_DIR, FLAGS.model_path)
 LOG_DIR = FLAGS.log_dir
 if not os.path.exists(LOG_DIR): os.mkdir(LOG_DIR)
 os.system('cp %s %s' % (MODEL_FILE, LOG_DIR)) # bkp of model def
@@ -142,6 +145,10 @@ def train():
         config.allow_soft_placement = True
         config.log_device_placement = False
         sess = tf.Session(config=config)
+	
+        if FLAGS.from_checkpoint:
+            saver.restore(sess, MODEL_PATH)
+            log_string("Model restored")
 
         # Add summary writers
         merged = tf.summary.merge_all()
@@ -149,8 +156,9 @@ def train():
         test_writer = tf.summary.FileWriter(os.path.join(LOG_DIR, 'test'), sess.graph)
 
         # Init variables
-        init = tf.global_variables_initializer()
-        sess.run(init)
+        if not  FLAGS.from_checkpoint:
+            init = tf.global_variables_initializer()
+            sess.run(init)
 
         ops = {'pointclouds_pl': pointclouds_pl,
                'normals_pl': normals_pl,
